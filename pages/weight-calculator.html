@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>স্বর্ণের ওজন ক্যালকুলেটর </title>
+<style>
+  body {
+    font-family: "Kalpurush", sans-serif;
+    background: linear-gradient(to bottom, #fff3e0, #f9a825);
+    color: #3e2723;
+    text-align: center;
+    padding: 15px;
+    margin: 0;
+    transition: background 0.5s;
+  }
+  h2 { color: #bf360c; margin-bottom: 10px; transition: color 0.5s; }
+  .group { margin: 10px 0; }
+  input {
+    width: 60px; margin: 3px; padding: 5px;
+    border: 1px solid #d7ccc8; border-radius: 5px; text-align: center;
+    transition: transform 0.3s;
+  }
+  input:focus { transform: scale(1.1); }
+  button {
+    margin: 5px; padding: 8px 14px;
+    background: #ff7043; color: white;
+    border: none; border-radius: 5px; font-size: 15px;
+    transition: background 0.3s, transform 0.2s;
+  }
+  button:hover {
+    background: #f4511e; cursor: pointer; transform: scale(1.05);
+  }
+  #result {
+    margin-top: 12px; font-size: 18px; font-weight: bold;
+    opacity: 0; animation: fadeIn 0.5s forwards;
+  }
+  #history {
+    margin-top: 20px; text-align: left; max-width: 420px;
+    margin-left: auto; margin-right: auto; background: #fffde7;
+    padding: 10px; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  }
+  #history h4 { margin: 0 0 8px 0; color: #bf360c; }
+  ul { padding-left: 20px; margin: 0; }
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+<h2>স্বর্ণের ওজন ক্যালকুলেটর</h2>
+
+<div class="group">
+<p><b>প্রথম স্বর্ণের ওজন</b></p>
+<input id="v1" type="number" placeholder="ভরি">
+<input id="a1" type="number" placeholder="আনা">
+<input id="r1" type="number" placeholder="রতি">
+<input id="p1" type="number" placeholder="পয়েন্ট">
+</div>
+
+<div class="group">
+<p><b>দ্বিতীয় স্বর্ণের ওজন</b></p>
+<input id="v2" type="number" placeholder="ভরি">
+<input id="a2" type="number" placeholder="আনা">
+<input id="r2" type="number" placeholder="রতি">
+<input id="p2" type="number" placeholder="পয়েন্ট">
+</div>
+
+<button onclick="calculate('add')">➕ যোগ</button>
+<button onclick="calculate('sub')">➖ বিয়োগ</button>
+<button onclick="setResultAsFirst()"> ফলাফল প্রথমে বসাও</button>
+<button onclick="clearAll()"> ক্লিয়ার</button>
+<button onclick="exportHistory()"> হিস্ট্রি এক্সপোর্ট</button>
+
+<div id="result"></div>
+
+<div id="history">
+  <h4> হিস্ট্রি</h4>
+  <ul id="historyList"></ul>
+</div>
+
+<script>
+function convertToPoint(v,a,r,p) { return v*16*6*10 + a*6*10 + r*10 + p; }
+function convertFromPoint(total){
+    var v=Math.floor(total/(16*6*10)); total%=16*6*10;
+    var a=Math.floor(total/(6*10)); total%=6*10;
+    var r=Math.floor(total/10); var p=total%10;
+    return v+" ভরি "+a+" আনা "+r+" রতি "+p+" পয়েন্ট";
+}
+
+// হিস্ট্রি লোড
+window.onload = function(){ loadHistory(); }
+
+function calculate(mode){
+    var v1=+get('v1'), a1=+get('a1'), r1=+get('r1'), p1=+get('p1');
+    var v2=+get('v2'), a2=+get('a2'), r2=+get('r2'), p2=+get('p2');
+    var t1=convertToPoint(v1,a1,r1,p1);
+    var t2=convertToPoint(v2,a2,r2,p2);
+    var total = (mode=='add') ? t1+t2 : Math.abs(t1 - t2);
+    var res = (mode=='add' ? "✅ যোগফল: " : "➖ বিয়োগফল: ") + convertFromPoint(total);
+    set('result',res);
+    addToHistory(res);
+    fadeResult();
+}
+function get(id){ return document.getElementById(id).value || 0; }
+function set(id,text){ document.getElementById(id).innerText=text; }
+
+function fadeResult(){
+    var el=document.getElementById('result');
+    el.style.opacity=0;
+    setTimeout(()=>{ el.style.animation="fadeIn 0.5s forwards"; },50);
+}
+
+function setResultAsFirst(){
+    var res=document.getElementById('result').innerText;
+    if(res){
+        var nums=res.match(/\d+/g);
+        if(nums && nums.length>=4){
+            document.getElementById('v1').value=nums[0];
+            document.getElementById('a1').value=nums[1];
+            document.getElementById('r1').value=nums[2];
+            document.getElementById('p1').value=nums[3];
+        }
+        // দ্বিতীয় ইনপুট ক্লিয়ার
+        ['v2','a2','r2','p2'].forEach(id => document.getElementById(id).value="");
+    }
+}
+
+function addToHistory(text){
+    var old=JSON.parse(localStorage.getItem('goldHistory')||"[]");
+    old.unshift(text); if(old.length>30) old.pop();
+    localStorage.setItem('goldHistory',JSON.stringify(old));
+    loadHistory();
+}
+function loadHistory(){
+    var list=JSON.parse(localStorage.getItem('goldHistory')||"[]");
+    var html=""; list.forEach(i=>{ html+="<li>"+i+"</li>"; });
+    document.getElementById('historyList').innerHTML=html;
+}
+function clearAll(){
+    localStorage.removeItem('goldHistory');
+    document.getElementById('historyList').innerHTML="";
+    document.getElementById('result').innerText="";
+    ['v1','a1','r1','p1','v2','a2','r2','p2'].forEach(id => document.getElementById(id).value="");
+}
+
+// হিস্ট্রি এক্সপোর্ট
+function exportHistory(){
+    var list=JSON.parse(localStorage.getItem('goldHistory')||"[]");
+    var text=list.join('\n');
+    var blob=new Blob([text], {type:'text/plain'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url; a.download='gold_history.txt';
+    a.click(); URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

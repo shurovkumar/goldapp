@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>স্বর্ণ মূল্য ক্যালকুলেটর</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Noto Sans Bengali', sans-serif;
+      background: linear-gradient(135deg, #fff4e6, #ffe9ec, #f0faff);
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: auto;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      animation: fadeIn 0.8s ease-in-out;
+    }
+
+    h2 {
+      text-align: center;
+      color: #b86b00;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: bold;
+      color: #444;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 10px;
+      background: #fff6e0;
+      font-size: 16px;
+      transition: 0.3s ease;
+    }
+
+    input:focus {
+      outline: none;
+      background: #fff0c0;
+      box-shadow: 0 0 8px #ffc107;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    button {
+      width: 48%;
+      padding: 12px;
+      font-weight: bold;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .calculate {
+      background: #ff9800;
+      color: #fff;
+    }
+
+    .calculate:hover {
+      background: #e68a00;
+    }
+
+    .clear {
+      background: #f44336;
+      color: #fff;
+    }
+
+    .clear:hover {
+      background: #d32f2f;
+    }
+
+    .result {
+      margin-top: 25px;
+      padding: 15px;
+      border-radius: 12px;
+      background: linear-gradient(to right, #ffecec, #fff8f8);
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      animation: fadeIn 0.8s ease-in-out;
+    }
+
+    .priceRed {
+      color: #b30000;
+      font-size: 20px;
+      font-weight: bold;
+      background: #ffe5e5;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .weightRed {
+      color: #8b0000;
+      font-size: 18px;
+      font-weight: bold;
+      background: #fceaea;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .download-btn {
+      width: 100%;
+      margin-top: 18px;
+      background: #26a69a;
+      color: white;
+    }
+
+    .download-btn:hover {
+      background: #00796b;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>স্বর্ণের মূল্য ক্যালকুলেটর</h2>
+
+    <label>ভরি:</label>
+    <input type="number" id="bhori">
+
+    <label>আনা:</label>
+    <input type="number" id="ana">
+
+    <label>রতি:</label>
+    <input type="number" id="rati">
+
+    <label>পয়েন্ট:</label>
+    <input type="number" id="point">
+
+    <label>স্বর্ণের মূল্য (৳):</label>
+    <input type="text" id="price">
+
+    <div class="buttons">
+      <button class="calculate" onclick="calculate()">হিসাব করুন</button>
+      <button class="clear" onclick="clearAll()">ক্লিয়ার করুন</button>
+    </div>
+
+    <div class="result" id="resultBox" style="display:none;">
+      <p id="priceResult" class="priceRed"></p>
+      <p id="weightResult" class="weightRed"></p>
+      <button class="download-btn" onclick="downloadHistory()">📥 হিস্ট্রি এক্সপোর্ট</button>
+    </div>
+  </div>
+
+  <script>
+    function formatNumber(num) {
+      return Number(num).toLocaleString('en-IN');
+    }
+
+    function parseNumber(input) {
+      return parseFloat(input.replace(/,/g, '')) || 0;
+    }
+
+    document.getElementById('price').addEventListener('input', function (e) {
+      const value = e.target.value.replace(/,/g, '');
+      if (!isNaN(value) && value !== '') {
+        e.target.value = formatNumber(value);
+      }
+    });
+
+    function calculate() {
+      const bhori = parseFloat(document.getElementById('bhori').value) || 0;
+      const ana = parseFloat(document.getElementById('ana').value) || 0;
+      const rati = parseFloat(document.getElementById('rati').value) || 0;
+      const point = parseFloat(document.getElementById('point').value) || 0;
+      const priceInput = document.getElementById('price').value;
+      const pricePerGram = parseNumber(priceInput);
+
+      const gramPerBhori = 11.664;
+      const totalGrams =
+        (bhori * gramPerBhori) +
+        (ana / 16) * gramPerBhori +
+        (rati / (16 * 6)) * gramPerBhori +
+        (point / (16 * 6 * 10)) * gramPerBhori;
+
+      const totalPrice = (totalGrams / gramPerBhori) * pricePerGram;
+
+      // Display result
+      document.getElementById('priceResult').innerText = ` মোট মূল্য: ${formatNumber(totalPrice.toFixed(2))} টাকা`;
+      document.getElementById('weightResult').innerText = ` মোট ওজন: ${totalGrams.toFixed(3)} গ্রাম`;
+
+      // Save only for history
+      window.lastGoldData = 
+` স্বর্ণ হিস্ট্রি রিপোর্ট
+━━━━━━━━━━━━━━━━━━━━━━━
+
+ মোট মূল্য:
+${formatNumber(totalPrice.toFixed(2))} টাকা
+
+ মোট ওজন:
+${totalGrams.toFixed(3)} গ্রাম
+
+ ইনপুট:
+ভরি: ${bhori}
+আনা: ${ana}
+রতি: ${rati}
+পয়েন্ট: ${point}
+
+🧮 প্রতি ভরিতে মূল্য: ${formatNumber(pricePerGram)} টাকা
+
+━━━━━━━━━━━━━━━━━━━━━━━`;
+
+      document.getElementById('resultBox').style.display = 'block';
+    }
+
+    function clearAll() {
+      document.querySelectorAll('input').forEach(input => input.value = '');
+      document.getElementById('resultBox').style.display = 'none';
+    }
+
+    function downloadHistory() {
+      const blob = new Blob([window.lastGoldData], { type: 'text/plain;charset=utf-8' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "gold_history.txt";
+      link.click();
+    }
+  </script>
+</body>
+</html>

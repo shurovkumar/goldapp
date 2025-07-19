@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>দস্তা ক্যালকুলেটর</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&display=swap');
+
+  body {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Noto Sans Bengali', sans-serif;
+    background: linear-gradient(135deg, #ffecd2, #fcb69f); /* Orange Gradient */
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: bodyGlow 10s infinite alternate;
+  }
+
+  @keyframes bodyGlow {
+    from { background-position: 0% 50%; }
+    to { background-position: 100% 50%; }
+  }
+
+  .container {
+    background: #fff8f0;
+    padding: 25px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 10px 30px rgba(255, 94, 0, 0.3);
+    animation: fadeIn 1s ease-in-out forwards;
+  }
+
+  h1 {
+    text-align: center;
+    color: #cc3300;
+    margin-bottom: 25px;
+    font-size: 26px;
+  }
+
+  label {
+    font-weight: 700;
+    display: block;
+    margin: 15px 0 6px;
+  }
+
+  input[type="number"] {
+    width: 100%;
+    padding: 12px 18px;
+    font-size: 18px;
+    border: 3px solid #ffae42;
+    border-radius: 15px;
+    background: #fff2e6;
+    box-shadow: inset 0 0 8px #ffcc99;
+    transition: all 0.4s ease;
+    outline: none;
+    animation: bounceIn 0.7s;
+  }
+
+  input[type="number"]:focus {
+    background: #fff0dd;
+    border-color: #ff6600;
+    box-shadow: 0 0 15px #ff944d;
+  }
+
+  button {
+    width: 48%;
+    padding: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 15px;
+    color: white;
+    cursor: pointer;
+    background: linear-gradient(to right, #ff6600, #ff3300);
+    box-shadow: 0 6px 12px rgba(255, 68, 0, 0.6);
+    transition: all 0.3s ease;
+    animation: fadeIn 1.2s ease-in;
+  }
+
+  button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 18px rgba(255, 51, 0, 0.8);
+  }
+
+  button.clear-btn {
+    background: linear-gradient(to right, #888888, #555555);
+  }
+
+  #result {
+    margin-top: 25px;
+    font-size: 22px;
+    font-weight: 900;
+    color: #cc0000;
+    text-align: center;
+    min-height: 40px;
+    opacity: 0;
+    animation: fadeInResult 0.8s forwards;
+  }
+
+  #history-section {
+    margin-top: 30px;
+    border-top: 2px solid #ffa366;
+    padding-top: 15px;
+  }
+
+  #history-section h3 {
+    color: #cc0000;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  #history-list {
+    max-height: 150px;
+    overflow-y: auto;
+    padding-left: 20px;
+    font-weight: bold;
+    color: #ff3300;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeInResult {
+    to { opacity: 1; }
+  }
+
+  @keyframes bounceIn {
+    0% { transform: scale(0.9); opacity: 0; }
+    60% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+
+  @media(max-width: 480px) {
+    button {
+      width: 100%;
+      margin-top: 10px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>দস্তা ক্যালকুলেটর</h1>
+
+    <label for="vori">ভরি লিখুন:</label>
+    <input type="number" id="vori" >
+
+    <label for="ana">আনা লিখুন:</label>
+    <input type="number" id="ana" >
+
+    <label for="rati">রতি লিখুন:</label>
+    <input type="number" id="rati" >
+
+    <div style="display:flex; justify-content:space-between; gap:10px; margin-top:20px;">
+      <button id="calculateBtn">হিসাব করুন</button>
+      <button id="clearBtn" class="clear-btn">ক্লিয়ার করুন</button>
+    </div>
+
+    <div id="result"></div>
+
+    <div id="history-section" style="display:none;">
+      <h3> হিস্ট্রি</h3>
+      <ul id="history-list"></ul>
+      <button id="downloadBtn" style="width:100%; margin-top:10px;"> হিস্ট্রি ডাউনলোড করুন</button>
+    </div>
+  </div>
+
+  <script>
+    const calculateBtn = document.getElementById('calculateBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const resultDiv = document.getElementById('result');
+    const historySection = document.getElementById('history-section');
+    const historyList = document.getElementById('history-list');
+    let history = [];
+
+    function calculateDosta(vori, ana, rati) {
+      const gold_total_rati = vori * 96 + ana * 6 + rati;
+      const dosta_per_rati = 0.46875;
+      const total_dosta_rati = gold_total_rati * dosta_per_rati;
+
+      const dosta_vori = Math.floor(total_dosta_rati / 96);
+      let remaining_rati = total_dosta_rati - (dosta_vori * 96);
+
+      const dosta_ana = Math.floor(remaining_rati / 6);
+      remaining_rati -= dosta_ana * 6;
+
+      const dosta_rati = Math.floor(remaining_rati);
+      const dosta_point = Math.round((remaining_rati - dosta_rati) * 10);
+
+      return { dosta_vori, dosta_ana, dosta_rati, dosta_point };
+    }
+
+    function updateHistoryUI() {
+      historyList.innerHTML = '';
+      history.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        historyList.appendChild(li);
+      });
+      historySection.style.display = history.length > 0 ? 'block' : 'none';
+    }
+
+    calculateBtn.addEventListener('click', () => {
+      let vori = parseInt(document.getElementById('vori').value) || 0;
+      let ana = parseInt(document.getElementById('ana').value) || 0;
+      let rati = parseInt(document.getElementById('rati').value) || 0;
+
+      const { dosta_vori, dosta_ana, dosta_rati, dosta_point } = calculateDosta(vori, ana, rati);
+      const output = `দস্তা লাগবে: ${dosta_vori} ভরি ${dosta_ana} আনা ${dosta_rati} রতি ${dosta_point} পয়েন্ট`;
+
+      resultDiv.textContent = output;
+      resultDiv.style.opacity = 0;
+      setTimeout(() => { resultDiv.style.opacity = 1; }, 100);
+
+      history.push(output);
+      updateHistoryUI();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      document.getElementById('vori').value = '';
+      document.getElementById('ana').value = '';
+      document.getElementById('rati').value = '';
+      resultDiv.textContent = '';
+      history = [];
+      updateHistoryUI();
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      if (history.length === 0) {
+        alert('কোন হিস্ট্রি নেই ডাউনলোড করার জন্য।');
+        return;
+      }
+      const blob = new Blob([history.join('\n')], { type: 'text/plain;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'gold_dosta_history.txt';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  </script>
+</body>
+</html>

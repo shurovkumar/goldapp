@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>কনিকা জুয়েলারি ক্যালকুলেটর</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@600&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans Bengali', sans-serif;
+      background: linear-gradient(to right, #fff7ec, #ffeccc);
+      padding: 0;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(to right, #ffb84d, #ff9933);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      padding: 30px;
+    }
+
+    .card {
+      padding: 30px 20px;
+      border-radius: 16px;
+      color: white;
+      font-size: 20px;
+      font-weight: 600;
+      text-align: center;
+      box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.2), transparent);
+      transform: rotate(25deg);
+      animation: shine 3s linear infinite;
+    }
+
+    @keyframes shine {
+      0% { transform: translateX(-100%) rotate(25deg); }
+      100% { transform: translateX(100%) rotate(25deg); }
+    }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.2);
+    }
+
+    /* Unique card colors */
+    .card.gold-price {
+      background: linear-gradient(to right, #ffd54f, #ffb300);
+    }
+
+    .card.dosta {
+      background: linear-gradient(to right, #ff8a65, #ff7043);
+    }
+
+    .card.loss {
+      background: linear-gradient(to right, #64b5f6, #2196f3);
+    }
+
+    .card.weight {
+      background: linear-gradient(to right, #81c784, #43a047);
+    }
+
+    /* Responsive font */
+    @media(max-width: 480px) {
+      .card {
+        font-size: 18px;
+        padding: 25px 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>🧮 কনিকা জুয়েলারি ক্যালকুলেটর</header>
+
+  <div class="container">
+    <div class="card gold-price" onclick="location.href='pages/gold-price.html'">
+      স্বর্ণের দাম
+    </div>
+    <div class="card dosta" onclick="location.href='pages/weight-calculator.html'">
+      স্বর্ণের ওজন যোগ ও বিয়োগ
+    </div>
+    <div class="card loss" onclick="location.href='pages/dosta-calculator.html'">
+      দস্তা হিসাব
+    </div>
+    <div class="card weight" onclick="location.href='pages/gold-loss.html'">
+      স্বর্ণ ক্ষয়
+    </div>
+  </div>
+
+</body>
+</html>

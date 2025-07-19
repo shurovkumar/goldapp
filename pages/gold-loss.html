@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>স্বর্ণ ক্ষয় ক্যালকুলেটর</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&display=swap');
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Noto Sans Bengali', sans-serif;
+      background: linear-gradient(to right, #fff8e1, #ffe57f);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      animation: backgroundShift 10s infinite alternate;
+    }
+
+    @keyframes backgroundShift {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    .container {
+      background: #fffbe6;
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 8px 25px rgba(255, 204, 0, 0.4);
+      animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      text-align: center;
+      color: #cc8800;
+      margin-bottom: 20px;
+      font-size: 26px;
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+      color: #8b5e00;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 16px;
+      border: 2px solid #fdd835;
+      border-radius: 12px;
+      background: #fff9c4;
+      transition: 0.3s;
+      outline: none;
+    }
+
+    input[type="number"]:focus {
+      border-color: #ffca28;
+      background: #fff59d;
+      box-shadow: 0 0 8px rgba(255, 193, 7, 0.4);
+    }
+
+    .flex-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      cursor: pointer;
+      background: linear-gradient(to right, #ffb300, #ffa000);
+      box-shadow: 0 5px 12px rgba(255, 167, 38, 0.4);
+      transition: transform 0.3s;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+    }
+
+    .btn.clear {
+      background: linear-gradient(to right, #aaa, #777);
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 17px;
+      font-weight: bold;
+      color: #b30000;
+      text-align: center;
+      opacity: 0;
+      min-height: 40px;
+      animation: fadeInResult 0.5s forwards;
+    }
+
+    @keyframes fadeInResult {
+      to { opacity: 1; }
+    }
+
+    #history-section {
+      margin-top: 25px;
+      border-top: 2px solid #fbc02d;
+      padding-top: 10px;
+    }
+
+    #history-section h3 {
+      color: #b26a00;
+      font-size: 18px;
+      text-align: center;
+    }
+
+    #history-list {
+      max-height: 140px;
+      overflow-y: auto;
+      font-size: 15px;
+      padding-left: 20px;
+      color: #aa0000;
+    }
+
+    @media(max-width: 480px) {
+      .flex-row {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>স্বর্ণ ক্ষয় ক্যালকুলেটর</h1>
+
+    <label>আগের স্বর্ণের ওজন:</label>
+    <div class="flex-row">
+      <input type="number" id="beforeVori" placeholder="ভরি">
+      <input type="number" id="beforeAna" placeholder="আনা">
+      <input type="number" id="beforeRoti" placeholder="রতি">
+      <input type="number" id="beforePoint" placeholder="পয়েন্ট">
+    </div>
+
+    <label>পরের স্বর্ণের ওজন:</label>
+    <div class="flex-row">
+      <input type="number" id="afterVori" placeholder="ভরি">
+      <input type="number" id="afterAna" placeholder="আনা">
+      <input type="number" id="afterRoti" placeholder="রতি">
+      <input type="number" id="afterPoint" placeholder="পয়েন্ট">
+    </div>
+
+    <div class="flex-row" style="margin-top:15px;">
+      <button class="btn" id="calc">হিসাব করুন</button>
+      <button class="btn clear" id="clear">ক্লিয়ার করুন</button>
+    </div>
+
+    <div id="result"></div>
+
+    <div id="history-section" style="display:none;">
+      <h3> হিস্ট্রি</h3>
+      <ul id="history-list"></ul>
+      <button class="btn" style="margin-top:10px;" id="download">ডাউনলোড হিস্ট্রি</button>
+    </div>
+  </div>
+
+  <script>
+    const calc = document.getElementById('calc');
+    const clear = document.getElementById('clear');
+    const result = document.getElementById('result');
+    const historyList = document.getElementById('history-list');
+    const download = document.getElementById('download');
+    const historySection = document.getElementById('history-section');
+    let history = [];
+
+    function toRoti(v, a, r, p) {
+      return v * 96 + a * 6 + r + p * 0.1;
+    }
+
+    function fromRoti(roti) {
+      const vori = Math.floor(roti / 96);
+      roti %= 96;
+      const ana = Math.floor(roti / 6);
+      roti %= 6;
+      const rati = Math.floor(roti);
+      const point = Math.round((roti - rati) * 10);
+      return { vori, ana, roti: rati, point };
+    }
+
+    function updateHistoryUI() {
+      historyList.innerHTML = '';
+      history.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        historyList.appendChild(li);
+      });
+      historySection.style.display = history.length > 0 ? 'block' : 'none';
+    }
+
+    calc.addEventListener('click', () => {
+      const bV = parseFloat(document.getElementById('beforeVori').value) || 0;
+      const bA = parseFloat(document.getElementById('beforeAna').value) || 0;
+      const bR = parseFloat(document.getElementById('beforeRoti').value) || 0;
+      const bP = parseFloat(document.getElementById('beforePoint').value) || 0;
+
+      const aV = parseFloat(document.getElementById('afterVori').value) || 0;
+      const aA = parseFloat(document.getElementById('afterAna').value) || 0;
+      const aR = parseFloat(document.getElementById('afterRoti').value) || 0;
+      const aP = parseFloat(document.getElementById('afterPoint').value) || 0;
+
+      const before = toRoti(bV, bA, bR, bP);
+      const after = toRoti(aV, aA, aR, aP);
+      const loss = before - after;
+
+      if (loss <= 0) {
+        result.textContent = '❌ কোন ক্ষয় হয়নি বা ইনপুট ভুল!';
+        return;
+      }
+
+      const loss1vori = (loss / before) * 96;
+      const totalLoss = fromRoti(loss);
+      const perVoriLoss = fromRoti(loss1vori);
+
+      const line1 = `মোট স্বর্ণ কমলো: ${totalLoss.vori} ভরি ${totalLoss.ana} আনা ${totalLoss.roti} রতি ${totalLoss.point} পয়েন্ট`;
+      const line2 = `১ ভরিতে স্বর্ণ কমলো: ${perVoriLoss.vori} ভরি ${perVoriLoss.ana} আনা ${perVoriLoss.roti} রতি ${perVoriLoss.point} পয়েন্ট`;
+
+      result.style.opacity = 0;
+      setTimeout(() => {
+        result.innerHTML = `${line1}<br>${line2}`;
+        result.style.opacity = 1;
+      }, 100);
+
+      history.push(`${line1} | ${line2}`);
+      updateHistoryUI();
+    });
+
+    clear.addEventListener('click', () => {
+      document.querySelectorAll('input[type="number"]').forEach(input => input.value = '');
+      result.textContent = '';
+      history = [];
+      updateHistoryUI();
+    });
+
+    download.addEventListener('click', () => {
+      if (history.length === 0) {
+        alert('কোন হিস্ট্রি নেই!');
+        return;
+      }
+      const blob = new Blob([history.join('\n')], { type: 'text/plain;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'gold_loss_history.txt';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  </script>
+</body>
+</html>
